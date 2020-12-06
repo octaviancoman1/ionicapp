@@ -4,5 +4,6 @@ export interface FlightProps{
     destinationCity:string,
     date: string,
     price: number,
-    avaiableSeats:number
+    avaiableSeats:number,
+    userId: string
 }

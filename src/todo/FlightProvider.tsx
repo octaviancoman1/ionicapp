@@ -10,7 +10,7 @@ import {
     eraseFlight,
 } from "./FlightApi";
 import {AuthContext} from "../auth/AuthProvider";
-
+import { Storage } from "@capacitor/core";
 const log = getLogger("ItemProvider");
 
 type SaveItemFn = (item: FlightProps) => Promise<any>;
@@ -59,8 +59,8 @@ const reducer: (state: ItemsState, action: ActionProps) => ItemsState = (
         case FETCH_ITEMS_SUCCEEDED:
             return { ...state, items: payload.items, fetching: false };
         case FETCH_ITEMS_FAILED:
-            return { ...state, fetchingError: payload.error, fetching: false };
-
+            //return { ...state, fetchingError: payload.error, fetching: false };
+            return {...state, items: payload.items, fetching: false};
         case SAVE_ITEM_STARTED:
             return { ...state, savingError: null, saving: true };
         case SAVE_ITEM_SUCCEEDED:
@@ -102,7 +102,7 @@ interface ItemProviderProps {
 }
 
 export const FlightProvider: React.FC<ItemProviderProps> = ({ children }) => {
-    const { token } = useContext(AuthContext);
+    const { token, _id } = useContext(AuthContext);
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
         items,
@@ -150,7 +150,42 @@ export const FlightProvider: React.FC<ItemProviderProps> = ({ children }) => {
                 }
             } catch (error) {
                 log("fetchItems failed");
-                dispatch({ type: FETCH_ITEMS_FAILED, payload: { error } });
+                const allKeys = Storage.keys();
+                let promisedItems;
+                var i;
+
+                promisedItems = await allKeys.then(function (allKeys) {
+                    const promises = [];
+                    for (i = 0; i < allKeys.keys.length; i++) {
+                        const promiseItem = Storage.get({key: allKeys.keys[i]});
+
+                        promises.push(promiseItem);
+                    }
+                    return promises;
+                });
+
+                const plantItems = [];
+                for (i = 0; i < promisedItems.length; i++) {
+
+                    const promise = promisedItems[i];
+                    const plant = await promise.then(function (it) {
+                        var object;
+                        try {
+                            object = JSON.parse(it.value);
+                        } catch (e) {
+                            return null;
+                        }
+                        if (object.userId === _id) {
+                            return object;
+                        }
+                        return null;
+                    });
+                    if (plant != null) {
+                        plantItems.push(plant);
+                    }
+                }
+                const items = plantItems;
+                dispatch({ type: FETCH_ITEMS_FAILED, payload: { items: items }});
             }
         }
     }
@@ -167,7 +202,8 @@ export const FlightProvider: React.FC<ItemProviderProps> = ({ children }) => {
             dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item: savedItem } });
         } catch (error) {
             log("saveItem failed");
-            dispatch({ type: SAVE_ITEM_FAILED, payload: { error } });
+            await Storage.set({ key: JSON.stringify(item._id), value: JSON.stringify(item) });
+            dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item } });
         }
     }
 
@@ -181,7 +217,8 @@ export const FlightProvider: React.FC<ItemProviderProps> = ({ children }) => {
             dispatch({ type: DELETE_ITEM_SUCCEEDED, payload: { item: item } });
         } catch (error) {
             log("delete failed");
-            dispatch({ type: DELETE_ITEM_FAILED, payload: { error } });
+            await Storage.set({key: JSON.stringify(item._id), value: JSON.stringify(item)});
+            dispatch({type: DELETE_ITEM_SUCCEEDED, payload: {item: item}});
         }
     }
 
@@ -190,15 +227,15 @@ export const FlightProvider: React.FC<ItemProviderProps> = ({ children }) => {
         log("wsEffect - connecting");
         let closeWebSocket: () => void;
         if (token?.trim()) {
-            closeWebSocket = newWebSocket(token, (message) => {
+            closeWebSocket = newWebSocket(token, message => {
                 if (canceled) {
                     return;
                 }
                 const { type, payload: item } = message;
                 log(`ws message, item ${type}`);
-                // if (type === "created" || type === "updated") {
-                //   dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item } });
-                // }
+                if (type === "created" || type === "updated") {
+                  dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item } });
+                }
             });
         }
         return () => {

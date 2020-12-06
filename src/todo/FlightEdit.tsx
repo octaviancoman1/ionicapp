@@ -16,6 +16,7 @@ import {getLogger} from '../core';
 import {ItemContext} from './FlightProvider';
 import {RouteComponentProps} from 'react-router';
 import {FlightProps} from './FlightProps';
+import {AuthContext} from "../auth";
 
 const log = getLogger('FlightEdit');
 
@@ -32,6 +33,8 @@ export const FlightEdit: React.FC<ItemEditProps> = ({history, match}) => {
     const [price, setPrice] = useState(0);
     const [avaiableSeats, setAvaiableSeats] = useState(0);
     const [item, setItem] = useState<FlightProps>();
+    const { _id } = useContext(AuthContext);
+    const [userId, setUserId] = useState(_id);
     useEffect(() => {
         log('useEffect');
         const routeId = match.params.id || '';
@@ -43,6 +46,7 @@ export const FlightEdit: React.FC<ItemEditProps> = ({history, match}) => {
             setDate(item.date);
             setPrice(item.price);
             setAvaiableSeats(item.avaiableSeats);
+
         }
     }, [match.params.id, items]);
     const handleSave = () => {
@@ -52,15 +56,16 @@ export const FlightEdit: React.FC<ItemEditProps> = ({history, match}) => {
             destinationCity,
             date,
             price,
-            avaiableSeats
-        } : {departureCity, destinationCity, date, price,avaiableSeats };
+            avaiableSeats,
+            userId
+        } : {departureCity, destinationCity, date, price,avaiableSeats,userId };
         saveItem && saveItem(editedItem).then(() => history.goBack());
     };
 
     const handleDelete = () => {
         const deletedItem = item
-            ? {...item, departureCity, destinationCity, date, price, avaiableSeats}
-            : {departureCity, destinationCity, date, price,avaiableSeats};
+            ? {...item, departureCity, destinationCity, date, price, avaiableSeats,userId}
+            : {departureCity, destinationCity, date, price,avaiableSeats,userId};
         deleteItem && deleteItem(deletedItem).then(() => history.goBack());
     };
     log('render');
