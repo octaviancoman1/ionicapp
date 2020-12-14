@@ -33,7 +33,7 @@ export const getFlights: (token:string) => Promise<FlightProps[]> = (token)  => 
 export const createFlight: (
     token:string,
     item:FlightProps
-) => Promise<FlightProps[]> = (token,item) =>{
+) => Promise<FlightProps> = (token,item) =>{
     var result = axios.post(itemUrl,item,authConfig(token));
     result.then(async function (r ){
         var item = r.data;
@@ -60,7 +60,7 @@ export const createFlight: (
 export const updateFlight: (
     token: string,
     item: FlightProps
-) => Promise<FlightProps[]> = (token, item) => {
+) => Promise<FlightProps> = (token, item) => {
     var result = axios.put(`${itemUrl}/${item._id}`, item, authConfig(token));
     result.then(async function (r) {
         var item = r.data;
@@ -87,13 +87,18 @@ export const updateFlight: (
 export const eraseFlight: (
     token: string,
     item: FlightProps
-) => Promise<FlightProps[]> = (token, item) => {
+) => Promise<FlightProps> = (token, item) => {
     var result = axios.delete(`${itemUrl}/${item._id}`, authConfig(token));
     result.then(async function (r) {
         await Storage.remove({ key: item._id! });
     });
     return withLogs(result, "deleteItem");
 };
+
+export const getFlight: (token: string, id:string) => Promise<FlightProps> = (token,id) =>{
+    var result= axios.get(`${itemUrl}/${id}`,authConfig(token))
+    return withLogs(result, "getFlight");
+}
 
 
 // export const eraseFlight: (token: string, flight:FlightProps) => Promise<FlightProps[]> = (token, flight) =>{

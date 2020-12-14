@@ -5,5 +5,7 @@ export interface FlightProps{
     date: string,
     price: number,
     avaiableSeats:number,
-    userId: string
+    userId: string,
+    status:number,
+    version:number
 }

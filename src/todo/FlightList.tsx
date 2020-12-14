@@ -17,7 +17,7 @@ import {
     IonInfiniteScrollContent,
     IonSelect,
     IonSelectOption,
-    IonSearchbar,
+    IonSearchbar, IonToast,
 } from "@ionic/react";
 
 import {add} from "ionicons/icons";
@@ -26,12 +26,19 @@ import {getLogger} from "../core";
 import {ItemContext} from "./FlightProvider";
 import {AuthContext} from "../auth";
 import {FlightProps} from "./FlightProps";
+import { useAppState } from './useAppState';
+import { useNetwork } from './useNetwork';
+import { useBackgroundTask } from "./useBackgroundTask";
+import { Network, NetworkStatus } from "@capacitor/core";
+
 
 const log = getLogger('FlightList');
 
 const FlightList: React.FC<RouteComponentProps> = ({history}) => {
+    const {appState} = useAppState();
+    const {networkStatus} = useNetwork();
 
-    const {items, fetching, fetchingError} = useContext(ItemContext);
+    const { saveItem, deleteItem, items, fetching, fetchingError, updateServer  } = useContext(ItemContext);
 
     const [disableInfiniteScroll, setDisableInfiniteScroll] = useState<boolean>(
         false
@@ -52,6 +59,13 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
         logout?.();
         return <Redirect to={{pathname: "/login"}}/>;
     };
+
+    useEffect(() => {
+        if (networkStatus.connected) {
+            updateServer && updateServer();
+        }
+    }, [networkStatus.connected]);
+
 
     useEffect(() => {
         if (items?.length) {
@@ -137,6 +151,12 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
                         </IonSelectOption>
                     ))}
                 </IonSelect>
+
+                {/*<div>App state is {JSON.stringify(appState)}</div>*/}
+                <div>Connected {JSON.stringify(networkStatus.connected)}</div>
+
+
+
                 {itemsShow &&
                 itemsShow.map((flight: FlightProps) => {
                     return (
@@ -149,6 +169,8 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
                             date={flight.date}
                             avaiableSeats={flight.avaiableSeats}
                             userId={flight.userId}
+                            status = {flight.status}
+                            version={flight.version}
                             onEdit={(id) => history.push(`/item/${id}`)}
                         />
                     );
@@ -169,6 +191,7 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
                         <IonIcon icon={add}/>
                     </IonFabButton>
                 </IonFab>
+
             </IonContent>
         </IonPage>
     );
