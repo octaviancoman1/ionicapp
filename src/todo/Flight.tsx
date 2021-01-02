@@ -10,7 +10,7 @@ const Flight: React.FC<ItemPropsExt> = ({_id,departureCity,destinationCity, imgP
     return(
         <IonItem onClick = {() => onEdit(_id)}>
             <IonLabel>{departureCity} {'->'} {destinationCity}</IonLabel>
-            <img src = {imgPath} style = {{height:50}} alt = "image"/>
+            <img src = {imgPath} style = {{height:50}} alt = "no image"/>
         </IonItem>
     );
 };

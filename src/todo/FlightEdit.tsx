@@ -228,7 +228,7 @@ export const FlightEdit: React.FC<ItemEditProps> = ({history, match}) => {
                     <IonLabel>Date: </IonLabel>
                     <IonDatetime value={date} onIonChange={e => setDate(String(e.detail.value))}></IonDatetime>
                 </IonItem>
-                <img src={item?.imgPath} alt="image2"/>
+                <img src={item?.imgPath} alt="no image"/>
                 <MapComponent
                     lat={latitude}
                     lng={longitude}
