@@ -10,7 +10,7 @@ import {
     IonTitle,
     IonToolbar,
     IonLabel,
-    IonDatetime, IonFabButton, IonFab, IonIcon, IonActionSheet
+    IonDatetime, IonFabButton, IonFab, IonIcon, IonActionSheet, createAnimation
 } from '@ionic/react';
 import {getLogger} from '../core';
 import {ItemContext} from './FlightProvider';
@@ -184,14 +184,47 @@ export const FlightEdit: React.FC<ItemEditProps> = ({history, match}) => {
     };
     log('render');
 
+    useEffect(() => {
+        async function groupedAnimation() {
+            const saveButtonAnimation = createAnimation()
+                .addElement(document.getElementsByClassName("button-save")[0])
+                .duration(1000)
+                .direction('alternate')
+                .iterations(Infinity)
+                .keyframes([
+                    {offset: 0, opacity: '0.6', transform: 'scale(0.7)'},
+                    {offset: 1, opacity: '0.99', transform: 'scale(1)'}
+                ])
+
+            const deleteButtonAnimation = createAnimation()
+                .addElement(document.getElementsByClassName("button-delete")[0])
+                .duration(1000)
+                .direction('alternate')
+                .iterations(Infinity)
+                .keyframes([
+                    {offset: 0, opacity: '0.6', transform: 'scale(0.7)'},
+                    {offset: 1, opacity: '0.99', transform: 'scale(1)'}
+                ])
+
+            const parentAnipation = createAnimation()
+                .duration(1000)
+                .iterations(Infinity)
+                .direction('alternate')
+                .addAnimation([saveButtonAnimation, deleteButtonAnimation])
+
+            parentAnipation.play();
+        }
+
+        groupedAnimation();
+    }, [])
     return (
         <IonPage>
             <IonHeader>
                 <IonToolbar>
                     <IonTitle>Edit</IonTitle>
                     <IonButtons slot="end">
-                        <IonButton onClick={handleSave}>Save</IonButton>
-                        <IonButton onClick={handleDelete}>Delete</IonButton>
+                        <IonButton onClick={handleSave} className="button-save">Save</IonButton>
+                        <IonButton onClick={handleDelete} className="button-delete">Delete</IonButton>
                     </IonButtons>
                 </IonToolbar>
             </IonHeader>
