@@ -19,7 +19,10 @@ export const getFlights: (token:string) => Promise<FlightProps[]> = (token)  => 
                     date:item.date,
                     price:item.price,
                     available:item.avaiableSeats,
-                    userId:item.userId
+                    userId:item.userId,
+                    imgPath:item.imgPath,
+                    latitude:item.latitude,
+                    longitude:item.longitude
                 }),
             });
         });
@@ -46,7 +49,10 @@ export const createFlight: (
                 date:item.date,
                 price:item.price,
                 available:item.avaiableSeats,
-                userId:item.userId
+                userId:item.userId,
+                imgPath:item.imgPath,
+                latitude:item.latitude,
+                longitude:item.longitude
             }),
 
         });
@@ -73,7 +79,10 @@ export const updateFlight: (
                 date:item.date,
                 price:item.price,
                 available:item.avaiableSeats,
-                userId:item.userId
+                userId:item.userId,
+                imgPath:item.imgPath,
+                latitude:item.latitude,
+                longitude:item.longitude
             }),
         });
     });

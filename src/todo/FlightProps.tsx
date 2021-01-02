@@ -7,5 +7,8 @@ export interface FlightProps{
     avaiableSeats:number,
     userId: string,
     status:number,
-    version:number
+    version:number,
+    imgPath:string,
+    latitude:number,
+    longitude:number
 }

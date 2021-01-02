@@ -26,19 +26,14 @@ import {getLogger} from "../core";
 import {ItemContext} from "./FlightProvider";
 import {AuthContext} from "../auth";
 import {FlightProps} from "./FlightProps";
-import { useAppState } from './useAppState';
 import { useNetwork } from './useNetwork';
-import { useBackgroundTask } from "./useBackgroundTask";
-import { Network, NetworkStatus } from "@capacitor/core";
-
 
 const log = getLogger('FlightList');
 
 const FlightList: React.FC<RouteComponentProps> = ({history}) => {
-    const {appState} = useAppState();
     const {networkStatus} = useNetwork();
 
-    const { saveItem, deleteItem, items, fetching, fetchingError, updateServer  } = useContext(ItemContext);
+    const {items, fetching, fetchingError, updateServer  } = useContext(ItemContext);
 
     const [disableInfiniteScroll, setDisableInfiniteScroll] = useState<boolean>(
         false
@@ -152,10 +147,7 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
                     ))}
                 </IonSelect>
 
-                {/*<div>App state is {JSON.stringify(appState)}</div>*/}
                 <div>Connected {JSON.stringify(networkStatus.connected)}</div>
-
-
 
                 {itemsShow &&
                 itemsShow.map((flight: FlightProps) => {
@@ -171,6 +163,9 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
                             userId={flight.userId}
                             status = {flight.status}
                             version={flight.version}
+                            imgPath={flight.imgPath}
+                            latitude={flight.latitude}
+                            longitude={flight.longitude}
                             onEdit={(id) => history.push(`/item/${id}`)}
                         />
                     );
