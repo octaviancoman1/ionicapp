@@ -212,6 +212,7 @@ export const FlightEdit: React.FC<ItemEditProps> = ({history, match}) => {
                 .direction('alternate')
                 .addAnimation([saveButtonAnimation, deleteButtonAnimation])
 
+
             parentAnipation.play();
         }
 
