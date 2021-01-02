@@ -2,6 +2,7 @@ import React, {useContext, useState, useEffect} from "react";
 import {RouteComponentProps} from "react-router";
 import {Redirect} from "react-router-dom";
 
+
 import {
     IonContent,
     IonFab,
@@ -17,7 +18,7 @@ import {
     IonInfiniteScrollContent,
     IonSelect,
     IonSelectOption,
-    IonSearchbar, IonToast,
+    IonSearchbar, IonToast, createAnimation
 } from "@ionic/react";
 
 import {add} from "ionicons/icons";
@@ -26,14 +27,14 @@ import {getLogger} from "../core";
 import {ItemContext} from "./FlightProvider";
 import {AuthContext} from "../auth";
 import {FlightProps} from "./FlightProps";
-import { useNetwork } from './useNetwork';
+import {useNetwork} from './useNetwork';
 
 const log = getLogger('FlightList');
 
 const FlightList: React.FC<RouteComponentProps> = ({history}) => {
     const {networkStatus} = useNetwork();
 
-    const {items, fetching, fetchingError, updateServer  } = useContext(ItemContext);
+    const {items, fetching, fetchingError, updateServer} = useContext(ItemContext);
 
     const [disableInfiniteScroll, setDisableInfiniteScroll] = useState<boolean>(
         false
@@ -61,7 +62,6 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
         }
     }, [networkStatus.connected]);
 
-
     useEffect(() => {
         if (items?.length) {
             setItemsShow(items.slice(0, 10));
@@ -71,9 +71,9 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
 
     async function searchNext($event: CustomEvent<void>) {
         if (items && position < items.length) {
-           setItemsShow([...itemsShow, ...items.slice(position,position + 11)]);
-           setPosition(position + 11);
-        }else{
+            setItemsShow([...itemsShow, ...items.slice(position, position + 11)]);
+            setPosition(position + 11);
+        } else {
             setDisableInfiniteScroll(true);
         }
         ($event.target as HTMLIonInfiniteScrollElement).complete();
@@ -98,7 +98,7 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
             setItemsShow(list);
 
         }
-    }, [filter,items]);
+    }, [filter, items]);
 
 
     useEffect(() => {
@@ -106,19 +106,37 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
             setItemsShow(items.filter((flight) => {
                 if (search !== " ") {
                     return flight.destinationCity.startsWith(search)
-                }else {
+                } else {
                     return true;
                 }
-            }).slice(0,10));
+            }).slice(0, 10));
         }
-    }, [search,items]);
+    }, [search, items]);
+
+    useEffect(() => {
+
+        async function basicAnimation() {
+            const element = document.getElementsByClassName("buttonAdd");
+            if (element) {
+                const animation = createAnimation()
+                    .addElement(element[0])
+                    .duration(3000)
+                    .iterations(1)
+                    .fromTo('transform', 'translateX(300px)', 'translateX(0px)')
+                    .fromTo('opacity', '0', '1.5');
+
+                animation.play();
+            }
+        }
+        basicAnimation();
+    }, []);
 
     return (
         <IonPage>
             <IonHeader>
                 <IonToolbar>
                     <IonTitle>Flight Manager App</IonTitle>
-                    <IonButton onClick={handleLogout}>Logout</IonButton>
+                    <IonButton onClick={handleLogout} >Logout</IonButton>
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>
@@ -161,7 +179,7 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
                             date={flight.date}
                             avaiableSeats={flight.avaiableSeats}
                             userId={flight.userId}
-                            status = {flight.status}
+                            status={flight.status}
                             version={flight.version}
                             imgPath={flight.imgPath}
                             latitude={flight.latitude}
@@ -181,8 +199,8 @@ const FlightList: React.FC<RouteComponentProps> = ({history}) => {
                 {fetchingError && (
                     <div>{fetchingError.message || "Failed to fetch items"}</div>
                 )}
-                <IonFab vertical="bottom" horizontal="end" slot="fixed">
-                    <IonFabButton onClick={() => history.push("/item")}>
+                <IonFab vertical="bottom" horizontal="end" slot="fixed" >
+                    <IonFabButton className="buttonAdd" onClick={() => history.push("/item")}>
                         <IonIcon icon={add}/>
                     </IonFabButton>
                 </IonFab>
